@@ -1,12 +1,11 @@
 package org.apache.carbondata.dictionary
 
-import java.io.File
 import java.util.UUID
 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types._
 
-import org.apache.carbondata.CardinalityMatrix
+import org.apache.carbondata.cardinality.CardinalityMatrix
 import org.apache.carbondata.core.datastore.impl.FileFactory
 import org.apache.carbondata.core.metadata.converter.ThriftWrapperSchemaConverterImpl
 import org.apache.carbondata.core.metadata.encoder.Encoding
@@ -122,18 +121,12 @@ object CarbonTableUtil {
 
   def checkDimensionColumn(carbonDataType: CarbonDataType, cardinality: Double): Boolean = {
     val cardinalityThreshold = 0.8
-
-    //Columns for which dictionary will be created are considered as dimension columns
+    //TODO: Columns for which dictionary will be created are considered as dimension columns
     if (cardinality > cardinalityThreshold) {
       false
     } else {
       true
     }
-
-    /*carbonDataType match {
-      case CarbonDataType.STRING => true
-      case _ => false
-    }*/
   }
 
 }

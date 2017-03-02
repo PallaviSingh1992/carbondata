@@ -6,12 +6,11 @@ import scala.collection.mutable.HashSet
 
 import org.apache.spark.sql.Row
 
-import org.apache.carbondata.CardinalityMatrix
-import org.apache.carbondata.core.cache.{Cache, CacheProvider, CacheType}
+import org.apache.carbondata.cardinality.CardinalityMatrix
 import org.apache.carbondata.core.cache.dictionary.{Dictionary, DictionaryColumnUniqueIdentifier}
-import org.apache.carbondata.core.metadata.{AbsoluteTableIdentifier, ColumnIdentifier}
+import org.apache.carbondata.core.cache.{Cache, CacheProvider, CacheType}
 import org.apache.carbondata.core.metadata.schema.table.CarbonTable
-import org.apache.carbondata.core.metadata.schema.table.column.CarbonDimension
+import org.apache.carbondata.core.metadata.{AbsoluteTableIdentifier, ColumnIdentifier}
 import org.apache.carbondata.core.writer.CarbonDictionaryWriterImpl
 import org.apache.carbondata.core.writer.sortindex.{CarbonDictionarySortIndexWriterImpl, CarbonDictionarySortInfoPreparator}
 
@@ -78,7 +77,10 @@ class GlobalDictionaryUtil {
 
   def isDictionaryColumn(cardinality: Double): Boolean = {
     val cardinalityThreshold = 0.8
-    if(cardinality > cardinalityThreshold) false
-    else true
+    if (cardinality > cardinalityThreshold) {
+      false
+    } else {
+      true
+    }
   }
 }
