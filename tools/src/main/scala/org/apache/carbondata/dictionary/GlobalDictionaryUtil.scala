@@ -2,6 +2,7 @@ package org.apache.carbondata.dictionary
 
 import java.util
 
+import scala.collection.mutable
 import scala.collection.mutable.HashSet
 
 import org.apache.spark.sql.Row
@@ -12,7 +13,8 @@ import org.apache.carbondata.core.cache.{Cache, CacheProvider, CacheType}
 import org.apache.carbondata.core.metadata.schema.table.CarbonTable
 import org.apache.carbondata.core.metadata.{AbsoluteTableIdentifier, ColumnIdentifier}
 import org.apache.carbondata.core.writer.CarbonDictionaryWriterImpl
-import org.apache.carbondata.core.writer.sortindex.{CarbonDictionarySortIndexWriterImpl, CarbonDictionarySortInfoPreparator}
+import org.apache.carbondata.core.writer.sortindex.{CarbonDictionarySortIndexWriterImpl,
+CarbonDictionarySortInfoPreparator}
 
 /**
  * Created by knoldus on 1/3/17.
@@ -25,13 +27,13 @@ class GlobalDictionaryUtil {
 
     val dims = carbonTable.getDimensionByTableName(carbonTable.getFactTableName)
     val measures = carbonTable.getMeasureByTableName(carbonTable.getFactTableName)
-    // val allColumns = List(dims, measures)
-    val dimArrSet = Array[HashSet[String]]()
+    val dimArrSet = new Array[HashSet[String]](dims.size())
     var index = 0
     cardinalityMatrix.map { cardMatrix =>
       if (isDictionaryColumn(cardMatrix.cardinality)) {
+        dimArrSet(index) = new mutable.HashSet[String]()
         cardMatrix.columnDataframe.collect().map { (elem: Row) =>
-          val data: String = elem.getAs[String](0)
+          val data: String = elem.get(0).toString
           dimArrSet(index).add(data)
         }
         index += 1

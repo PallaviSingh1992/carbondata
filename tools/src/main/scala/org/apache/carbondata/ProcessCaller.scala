@@ -14,18 +14,22 @@ trait ProcessCaller {
     val LOGGER: LogService = LogServiceFactory.getLogService(this.getClass.getName)
     if (args.length > 5 || args.length < 1) {
       LOGGER.error("Invalid input parameters.")
-      LOGGER.error("[Usage]: <Path> <File Header(Comma-separated)>[Optional] <Delimiter>[Optional] <Quote Character>[Optional] <Bad Record Action>[Optional]")
+      LOGGER
+        .error(
+          "[Usage]: <Path> <File Header(Comma-separated)>[Optional] <Delimiter>[Optional] <Quote " +
+          "Character>[Optional] <Bad Record Action>[Optional]")
       throw InvalidParameterException("Invalid Parameter Exception")
     } else {
       val (dataFrame, arguments) = loadHandler.getDataFrameAndArguments(args)
-      /*val cardinalityMatrix = */cardinalityProcessor.getCardinalityMatrix(dataFrame, arguments)
-      //CarbonTableUtil.createDictionary(cardinalityMatrix, dataFrame)
+      val cardinalityMatrix = cardinalityProcessor.getCardinalityMatrix(dataFrame, arguments)
+      CarbonTableUtil.createDictionary(cardinalityMatrix, dataFrame)
+      LOGGER.info("Dictionary created successfully.")
+      cardinalityMatrix
     }
   }
-
 }
 
-object ProcessCaller extends ProcessCaller{
+object ProcessCaller extends ProcessCaller {
   val loadHandler: LoadHandler = LoadHandler
   val cardinalityProcessor: CardinalityProcessor = CardinalityProcessor
 }

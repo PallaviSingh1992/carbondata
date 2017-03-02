@@ -49,7 +49,7 @@ object CarbonTableUtil {
       columnSchema.setColumnar(true)
       columnSchema.setDataType(parseDataType(element.dataType))
       columnSchema.setEncodingList(encoding)
-      columnSchema.setColumnUniqueId(UUID.randomUUID().toString)
+      columnSchema.setColumnUniqueId(element.columnName)
       columnSchema
         .setDimensionColumn(checkDimensionColumn(columnSchema.getDataType, element.cardinality))
       // TODO: assign column group id to all columns
@@ -68,7 +68,6 @@ object CarbonTableUtil {
     tableInfo.setLastUpdatedTime(System.currentTimeMillis())
     tableInfo.setFactTable(tableSchema)
     tableInfo.setAggregateTableList(List())
-    //val carbonTablePath=new CarbonStorePath("./target/store/T1")
     val carbonTablePath = CarbonStorePath
       .getCarbonTablePath(absoluteTableIdentifier.getStorePath,
         absoluteTableIdentifier.getCarbonTableIdentifier)
