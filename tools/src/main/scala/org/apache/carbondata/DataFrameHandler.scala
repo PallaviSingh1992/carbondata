@@ -4,6 +4,9 @@ import org.apache.carbondata.common.logging.{LogService, LogServiceFactory}
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
+import org.apache.carbondata.dictionary.CarbonTableUtil
+
+
 case class CommandLineArguments(inputPath: String, fileHeaders: Option[List[String]] = None, delimiter: String = ",", quoteCharacter: String = " \"",
                                 badRecordAction: String = "IGNORE")
 
@@ -50,7 +53,11 @@ class DataFrameHandler {
     val isHeaderExist = parameters.fileHeaders.isDefined
     val dataFrame = loadData(parameters.inputPath, isHeaderExist)
     val cardinalityProcessor = new CardinalityProcessor
-    println("Cardinality Matrix is : " + cardinalityProcessor.getCardinalityMatrix(dataFrame, parameters))
+    val cardinalityMatrix: Seq[CardinalityMatrix] = cardinalityProcessor.getCardinalityMatrix(dataFrame, parameters)
+    println("Cardinality Matrix is : " + cardinalityMatrix)
+
+    CarbonTableUtil.createDictionary(cardinalityMatrix.toList, dataFrame)
+    println("Dictionary created successfully !!!!")
   }
 
   def loadData(filePath: String, isHeaderExist: Boolean): DataFrame = {

@@ -1,5 +1,6 @@
 package samples
 
+/*
 import org.junit._
 import Assert._
 
@@ -13,5 +14,6 @@ class AppTest {
 //    def testKO() = assertTrue(false)
 
 }
+*/
 
 
