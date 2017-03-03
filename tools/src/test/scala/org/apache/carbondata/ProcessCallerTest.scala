@@ -6,6 +6,8 @@ import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
+import org.apache.carbondata.dictionary.CarbonTableUtil
+
 class ProcessCallerTest extends FunSuite with MockitoSugar with ProcessCaller with BeforeAndAfter {
 
 
@@ -22,6 +24,7 @@ class ProcessCallerTest extends FunSuite with MockitoSugar with ProcessCaller wi
 
   val loadHandler: LoadHandler = mock[LoadHandler]
   val cardinalityProcessor: CardinalityProcessor = mock[CardinalityProcessor]
+  val carbonTableUtil: CarbonTableUtil = mock[CarbonTableUtil]
 
   val commandLineArguments = CommandLineArguments("file_path")
   val arguments = Array("filePath", "File Header", "Delimiter", "QuoteCharacter", "Bad Record Action")

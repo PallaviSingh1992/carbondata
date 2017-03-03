@@ -9,6 +9,7 @@ trait ProcessCaller {
 
   val loadHandler: LoadHandler
   val cardinalityProcessor: CardinalityProcessor
+  val carbonTableUtil: CarbonTableUtil
 
   def startProcess(args: Array[String]): List[CardinalityMatrix] = {
     val LOGGER: LogService = LogServiceFactory.getLogService(this.getClass.getName)
@@ -22,7 +23,7 @@ trait ProcessCaller {
     } else {
       val (dataFrame, arguments) = loadHandler.getDataFrameAndArguments(args)
       val cardinalityMatrix = cardinalityProcessor.getCardinalityMatrix(dataFrame, arguments)
-      CarbonTableUtil.createDictionary(cardinalityMatrix, dataFrame)
+      carbonTableUtil.createDictionary(cardinalityMatrix, dataFrame)
       LOGGER.info("Dictionary created successfully.")
       cardinalityMatrix
     }
@@ -32,4 +33,5 @@ trait ProcessCaller {
 object ProcessCaller extends ProcessCaller {
   val loadHandler: LoadHandler = LoadHandler
   val cardinalityProcessor: CardinalityProcessor = CardinalityProcessor
+  val carbonTableUtil: CarbonTableUtil = CarbonTableUtil
 }
