@@ -2,55 +2,58 @@ package org.apache.carbondata.dictionary
 
 import java.util
 
-import scala.collection.mutable
-import scala.collection.mutable.HashSet
-
 import org.apache.spark.sql.Row
 
 import org.apache.carbondata.cardinality.CardinalityMatrix
 import org.apache.carbondata.core.cache.dictionary.{Dictionary, DictionaryColumnUniqueIdentifier}
 import org.apache.carbondata.core.cache.{Cache, CacheProvider, CacheType}
 import org.apache.carbondata.core.metadata.schema.table.CarbonTable
-import org.apache.carbondata.core.metadata.schema.table.column.CarbonDimension
+import org.apache.carbondata.core.metadata.schema.table.column.{CarbonDimension, CarbonMeasure}
 import org.apache.carbondata.core.metadata.{AbsoluteTableIdentifier, ColumnIdentifier}
 import org.apache.carbondata.core.writer.CarbonDictionaryWriterImpl
-import org.apache.carbondata.core.writer.sortindex.{CarbonDictionarySortIndexWriterImpl, CarbonDictionarySortInfoPreparator}
+import org.apache.carbondata.core.writer.sortindex.{CarbonDictionarySortIndexWriterImpl,
+CarbonDictionarySortInfoPreparator}
 
-/**
- * Created by knoldus on 1/3/17.
- */
 trait GlobalDictionaryUtil {
 
   def writeDictionary(carbonTable: CarbonTable,
       cardinalityMatrix: List[CardinalityMatrix],
-      absoluteTableIdentifier: AbsoluteTableIdentifier) = {
+      absoluteTableIdentifier: AbsoluteTableIdentifier): Unit = {
 
-    val dimensions: util.List[CarbonDimension] = carbonTable.getDimensionByTableName(carbonTable.getFactTableName)
-    val measures = carbonTable.getMeasureByTableName(carbonTable.getFactTableName)
-    val dimArrSet: Array[mutable.HashSet[String]] = new Array[HashSet[String]](dimensions.size())
-    var index = 0
-    cardinalityMatrix.map { cardMatrix =>
-      if (isDictionaryColumn(cardMatrix.cardinality)) {
-        dimArrSet(index) = new mutable.HashSet[String]()
-        cardMatrix.columnDataframe.collect().map { (elem: Row) =>
-          val data: String = elem.get(0).toString
-          dimArrSet(index).add(data)
-        }
-        index += 1
-      }
-    }
+    val dimensions: util.List[CarbonDimension] = carbonTable
+      .getDimensionByTableName(carbonTable.getFactTableName)
+    //TODO List of Columns of type measures
+    val measures: util.List[CarbonMeasure] = carbonTable
+      .getMeasureByTableName(carbonTable.getFactTableName)
+    val dimArrSet: Array[Set[String]] = identifyDictionaryColumns(cardinalityMatrix,
+      dimensions)
     writeDictionaryToFile(absoluteTableIdentifier, dimArrSet, dimensions)
   }
 
-  def writeDictionaryToFile(absoluteTableIdentifier: AbsoluteTableIdentifier, dimArrSet: Array[mutable.HashSet[String]], dimensions: util.List[CarbonDimension]): Unit = {
+  private def identifyDictionaryColumns(cardinalityMatrix: List[CardinalityMatrix],
+      dimensions: util.List[CarbonDimension]): Array[Set[String]] = {
+    val dimArrSet: Array[Set[String]] = new Array[Set[String]](dimensions.size())
+    cardinalityMatrix.zipWithIndex.map { case (columnCardinality, index) =>
+      if (isDictionaryColumn(columnCardinality.cardinality)) {
+        dimArrSet(index) = Set[String]()
+        columnCardinality.columnDataframe.collect().map { (elem: Row) =>
+          val data: String = elem.get(0).toString
+          dimArrSet(index) += data
+        }
+      }
+    }
+    dimArrSet
+  }
+
+  private def writeDictionaryToFile(absoluteTableIdentifier: AbsoluteTableIdentifier,
+      dimArrSet: Array[Set[String]],
+      dimensions: util.List[CarbonDimension]): Unit = {
     val dictCache: Cache[java.lang.Object, Dictionary] = CacheProvider.getInstance()
       .createCache(CacheType.REVERSE_DICTIONARY, absoluteTableIdentifier.getStorePath)
-    var i = 0
-    dimArrSet.map { dimSet =>
-      val columnIdentifier = new ColumnIdentifier(dimensions.get(i).getColumnId, null, null)
-      val writer = new CarbonDictionaryWriterImpl(absoluteTableIdentifier.getStorePath,
-        absoluteTableIdentifier.getCarbonTableIdentifier,
-        columnIdentifier)
+    dimArrSet.zipWithIndex.foreach { case (dimSet, i) =>
+      val columnIdentifier: ColumnIdentifier = new ColumnIdentifier(dimensions.get(i).getColumnId,
+        null, null)
+      val writer = dictionaryWriter(columnIdentifier, absoluteTableIdentifier, dimensions, i)
 
       dimSet.map(elem => writer.write(elem))
       writer.close()
@@ -59,23 +62,41 @@ trait GlobalDictionaryUtil {
       val dict: Dictionary = dictCache
         .get(new DictionaryColumnUniqueIdentifier(absoluteTableIdentifier.getCarbonTableIdentifier,
           columnIdentifier, dimensions.get(i).getDataType))
-      val newDistinctValues = new util.ArrayList[String]
-      val dictionarySortInfoPreparator = new CarbonDictionarySortInfoPreparator()
-      val carbonDictionarySortInfo = dictionarySortInfoPreparator
-        .getDictionarySortInfo(newDistinctValues, dict, dimensions.get(i).getDataType)
+      sortIndexWriter(dict, columnIdentifier, absoluteTableIdentifier, dimensions, i)
+    }
+  }
 
-      val carbonDictionarySortIndexWriter = new CarbonDictionarySortIndexWriterImpl(
-        absoluteTableIdentifier.getCarbonTableIdentifier,
-        columnIdentifier,
-        absoluteTableIdentifier.getStorePath)
-      i += 1
-      try {
-        carbonDictionarySortIndexWriter.writeSortIndex(carbonDictionarySortInfo.getSortIndex())
-        carbonDictionarySortIndexWriter
-          .writeInvertedSortIndex(carbonDictionarySortInfo.getSortIndexInverted())
-      } finally {
-        carbonDictionarySortIndexWriter.close()
-      }
+  private def dictionaryWriter(columnIdentifier: ColumnIdentifier,
+      absoluteTableIdentifier: AbsoluteTableIdentifier,
+      dimensions: util.List[CarbonDimension],
+      index: Int): CarbonDictionaryWriterImpl = {
+    val writer: CarbonDictionaryWriterImpl = new CarbonDictionaryWriterImpl(absoluteTableIdentifier
+      .getStorePath,
+      absoluteTableIdentifier.getCarbonTableIdentifier,
+      columnIdentifier)
+    writer
+  }
+
+  private def sortIndexWriter(dict: Dictionary,
+      columnIdentifier: ColumnIdentifier,
+      absoluteTableIdentifier: AbsoluteTableIdentifier,
+      dimensions: util.List[CarbonDimension],
+      index: Int): Unit = {
+    val newDistinctValues = new util.ArrayList[String]
+    val dictionarySortInfoPreparator = new CarbonDictionarySortInfoPreparator()
+    val carbonDictionarySortInfo = dictionarySortInfoPreparator
+      .getDictionarySortInfo(newDistinctValues, dict, dimensions.get(index).getDataType)
+
+    val carbonDictionarySortIndexWriter = new CarbonDictionarySortIndexWriterImpl(
+      absoluteTableIdentifier.getCarbonTableIdentifier,
+      columnIdentifier,
+      absoluteTableIdentifier.getStorePath)
+    try {
+      carbonDictionarySortIndexWriter.writeSortIndex(carbonDictionarySortInfo.getSortIndex())
+      carbonDictionarySortIndexWriter
+        .writeInvertedSortIndex(carbonDictionarySortInfo.getSortIndexInverted())
+    } finally {
+      carbonDictionarySortIndexWriter.close()
     }
   }
 

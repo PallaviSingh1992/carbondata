@@ -21,10 +21,6 @@ import org.apache.carbondata.core.util.path.{CarbonStorePath, CarbonTablePath}
 import org.apache.carbondata.core.writer.ThriftWriter
 import org.apache.carbondata.format.SchemaEvolutionEntry
 
-
-/**
- * Created by knoldus on 28/2/17.
- */
 trait CarbonTableUtil {
 
   val globalDictionaryUtil: GlobalDictionaryUtil
@@ -107,7 +103,7 @@ trait CarbonTableUtil {
       columnSchema.setEncodingList(encoding)
       columnSchema.setColumnUniqueId(element.columnName)
       columnSchema
-        .setDimensionColumn(checkDimensionColumn(columnSchema.getDataType, element.cardinality))
+        .setDimensionColumn(globalDictionaryUtil.isDictionaryColumn(element.cardinality))
       // TODO: assign column group id to all columns
       columnGroupId += 1
       columnSchema.setColumnGroup(columnGroupId)
@@ -134,15 +130,6 @@ trait CarbonTableUtil {
     }
   }
 
-  def checkDimensionColumn(carbonDataType: CarbonDataType, cardinality: Double): Boolean = {
-    val cardinalityThreshold = 0.8
-    //TODO: Columns for which dictionary will be created are considered as dimension columns
-    if (cardinality > cardinalityThreshold) {
-      false
-    } else {
-      true
-    }
-  }
 }
 
 object CarbonTableUtil extends CarbonTableUtil {
