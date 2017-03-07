@@ -37,7 +37,7 @@ trait CarbonTableUtil {
     val tableSchema: TableSchema = new TableSchema()
     val absoluteTableIdentifier: AbsoluteTableIdentifier = new AbsoluteTableIdentifier(
       "./target/store/T1",
-      new CarbonTableIdentifier("Default_DB", "Default_TB", UUID.randomUUID().toString()))
+      new CarbonTableIdentifier("", "", UUID.randomUUID().toString()))
     val columnSchemas = getColumnSchemas(cardinalityMatrix)
     tableSchema.setListOfColumns(columnSchemas)
     val schemaEvol: SchemaEvolution = new SchemaEvolution()
@@ -71,8 +71,8 @@ trait CarbonTableUtil {
       tableInfo: TableInfo,
       absoluteTableIdentifier: AbsoluteTableIdentifier): (String, String) = {
     tableInfo.setStorePath("./target/store/T1")
-    tableInfo.setDatabaseName("Default_DB")
-    tableSchema.setTableName("Default_TB")
+    tableInfo.setDatabaseName("")
+    tableSchema.setTableName("")
     tableSchema.setSchemaEvalution(schemaEvol)
     tableSchema.setTableId(UUID.randomUUID().toString)
     tableInfo.setTableUniqueName(
