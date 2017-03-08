@@ -8,11 +8,14 @@ import org.apache.carbondata.cardinality.CardinalityMatrix
 import org.apache.carbondata.core.cache.dictionary.{Dictionary, DictionaryColumnUniqueIdentifier}
 import org.apache.carbondata.core.cache.{Cache, CacheProvider, CacheType}
 import org.apache.carbondata.core.constants.CarbonCommonConstants
+import org.apache.carbondata.core.datastore.impl.FileFactory
 import org.apache.carbondata.core.metadata.schema.table.CarbonTable
 import org.apache.carbondata.core.metadata.schema.table.column.{CarbonDimension, CarbonMeasure}
 import org.apache.carbondata.core.metadata.{AbsoluteTableIdentifier, ColumnIdentifier}
 import org.apache.carbondata.core.writer.CarbonDictionaryWriterImpl
-import org.apache.carbondata.core.writer.sortindex.{CarbonDictionarySortIndexWriterImpl, CarbonDictionarySortInfoPreparator}
+import org.apache.carbondata.core.writer.sortindex.{CarbonDictionarySortIndexWriterImpl,
+CarbonDictionarySortInfoPreparator}
+
 
 trait GlobalDictionaryUtil {
 
@@ -25,44 +28,81 @@ trait GlobalDictionaryUtil {
     //TODO List of Columns of type measures
     val measures: util.List[CarbonMeasure] = carbonTable
       .getMeasureByTableName(carbonTable.getFactTableName)
-    val dimArrSet: Array[Set[String]] = identifyDictionaryColumns(cardinalityMatrix,
+    val (dimArrSet: Array[Set[String]], dictColumnNames) = identifyDictionaryColumns(
+      cardinalityMatrix,
       dimensions)
-    writeDictionaryToFile(absoluteTableIdentifier, dimArrSet, dimensions)
+    writeDictionaryToFile(absoluteTableIdentifier, dimArrSet, dimensions, dictColumnNames)
   }
 
   private def identifyDictionaryColumns(cardinalityMatrix: List[CardinalityMatrix],
-      dimensions: util.List[CarbonDimension]): Array[Set[String]] = {
+      dimensions: util.List[CarbonDimension]): (Array[Set[String]], List[String]) = {
     val dimArrSet: Array[Set[String]] = new Array[Set[String]](dimensions.size())
-      val x = cardinalityMatrix.filter(cardMatrix => isDictionaryColumn(cardMatrix.cardinality)).zipWithIndex.map { case (columnCardinality, index) =>
+    val dictColumnNames: List[String] = cardinalityMatrix
+      .filter(cardMatrix => isDictionaryColumn(cardMatrix.cardinality)).zipWithIndex
+      .map { case (columnCardinality, index) =>
         dimArrSet(index) = Set[String]()
         columnCardinality.columnDataframe.distinct.collect().map { (elem: Row) =>
-          val data: String = elem.get(0).toString
-          dimArrSet(index) += data
+          dimArrSet(index) += elem.get(0).toString
         }
-    }
-    dimArrSet
+        columnCardinality.columnName
+      }
+    (dimArrSet, dictColumnNames)
+  }
+
+  private def checkDistinctValue(dimensionValue: String, dict: Dictionary) = {
+    dimensionValue != null &&
+    dict.getSurrogateKey(dimensionValue) == CarbonCommonConstants.INVALID_SURROGATE_KEY
   }
 
   private def writeDictionaryToFile(absoluteTableIdentifier: AbsoluteTableIdentifier,
       dimArrSet: Array[Set[String]],
-      dimensions: util.List[CarbonDimension]): Unit = {
+      dimensions: util.List[CarbonDimension], dictColumnNames: List[String]): Unit = {
     val dictCache: Cache[java.lang.Object, Dictionary] = CacheProvider.getInstance()
       .createCache(CacheType.REVERSE_DICTIONARY, absoluteTableIdentifier.getStorePath)
     dimArrSet.zipWithIndex.foreach { case (dimSet, index) =>
-      val columnIdentifier: ColumnIdentifier = new ColumnIdentifier(dimensions.get(index).getColumnId,
+      val columnIdentifier: ColumnIdentifier = new ColumnIdentifier(dimensions.get(index)
+        .getColumnId,
         null, null)
       val writer = dictionaryWriter(columnIdentifier, absoluteTableIdentifier, dimensions, index)
-      writer.write(CarbonCommonConstants.MEMBER_DEFAULT_VAL)
-      val defaultValue = Set(CarbonCommonConstants.MEMBER_DEFAULT_VAL)
-      val dimensionSet: Set[String] = collection.immutable.SortedSet[String]() ++ dimSet
-      dimensionSet.map(elem => writer.write(elem))
-      writer.close()
-      writer.commit()
+      val storeLocation = "./target/store/T1"
+      val dictFilePath = storeLocation + "/Metadata/" + dictColumnNames(index) + ".dict"
+      val fileType = FileFactory.getFileType(dictFilePath)
 
       val dict: Dictionary = dictCache
         .get(new DictionaryColumnUniqueIdentifier(absoluteTableIdentifier.getCarbonTableIdentifier,
           columnIdentifier, dimensions.get(index).getDataType))
-      sortIndexWriter(dict, columnIdentifier, absoluteTableIdentifier, dimensions, index, (defaultValue ++ dimensionSet).toList)
+
+      val dimensionSet: Set[String] = collection.immutable.SortedSet[String]() ++ dimSet
+
+      // Dictionary Generation from Source Data Files
+      if (!FileFactory.isFileExist(dictFilePath, fileType)) {
+        writer.write(CarbonCommonConstants.MEMBER_DEFAULT_VAL)
+        dimensionSet.map(elem => writer.write(elem))
+        writer.close()
+        writer.commit()
+        sortIndexWriter(dict,
+          columnIdentifier,
+          absoluteTableIdentifier,
+          dimensions,
+          index,
+          (dimensionSet + CarbonCommonConstants.MEMBER_DEFAULT_VAL).toList)
+      }
+      else {
+        //Dictionary Generation For Incremental Data Load
+        val distinctVal: Set[String] = dimensionSet
+          .filter(dimVal => checkDistinctValue(dimVal, dict)).map { dimensionValue =>
+          writer.write(dimensionValue)
+          dimensionValue
+        }
+        writer.close()
+        writer.commit()
+        sortIndexWriter(dict,
+          columnIdentifier,
+          absoluteTableIdentifier,
+          dimensions,
+          index,
+          distinctVal.toList)
+      }
     }
   }
 
