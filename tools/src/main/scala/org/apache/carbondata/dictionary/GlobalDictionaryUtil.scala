@@ -16,7 +16,6 @@ import org.apache.carbondata.core.writer.CarbonDictionaryWriterImpl
 import org.apache.carbondata.core.writer.sortindex.{CarbonDictionarySortIndexWriterImpl,
 CarbonDictionarySortInfoPreparator}
 
-
 trait GlobalDictionaryUtil {
 
   def writeDictionary(carbonTable: CarbonTable,
@@ -49,61 +48,85 @@ trait GlobalDictionaryUtil {
     (dimArrSet, dictColumnNames)
   }
 
-  private def checkDistinctValue(dimensionValue: String, dict: Dictionary) = {
-    dimensionValue != null &&
-    dict.getSurrogateKey(dimensionValue) == CarbonCommonConstants.INVALID_SURROGATE_KEY
+  def getStorePath(storePath: String = "./target/store/T1"): String = {
+    storePath
+  }
+
+  private def getDictFilePath(dictColumnName: String): String = {
+    getStorePath() + "/Metadata/" + dictColumnName + ".dict"
   }
 
   private def writeDictionaryToFile(absoluteTableIdentifier: AbsoluteTableIdentifier,
       dimArrSet: Array[Set[String]],
-      dimensions: util.List[CarbonDimension], dictColumnNames: List[String]): Unit = {
+      dimensions: util.List[CarbonDimension],
+      dictColumnNames: List[String]): Unit = {
     val dictCache: Cache[java.lang.Object, Dictionary] = CacheProvider.getInstance()
       .createCache(CacheType.REVERSE_DICTIONARY, absoluteTableIdentifier.getStorePath)
     dimArrSet.zipWithIndex.foreach { case (dimSet, index) =>
       val columnIdentifier: ColumnIdentifier = new ColumnIdentifier(dimensions.get(index)
-        .getColumnId,
-        null, null)
-      val writer = dictionaryWriter(columnIdentifier, absoluteTableIdentifier, dimensions, index)
-      val storeLocation = "./target/store/T1"
-      val dictFilePath = storeLocation + "/Metadata/" + dictColumnNames(index) + ".dict"
+        .getColumnId, null, null)
+      val writer: CarbonDictionaryWriterImpl = dictionaryWriter(columnIdentifier,
+        absoluteTableIdentifier,
+        dimensions,
+        index)
+      val dictFilePath = getDictFilePath(dictColumnNames(index))
       val fileType = FileFactory.getFileType(dictFilePath)
 
       val dict: Dictionary = dictCache
         .get(new DictionaryColumnUniqueIdentifier(absoluteTableIdentifier.getCarbonTableIdentifier,
-          columnIdentifier, dimensions.get(index).getDataType))
+          columnIdentifier,
+          dimensions.get(index).getDataType))
 
       val dimensionSet: Set[String] = collection.immutable.SortedSet[String]() ++ dimSet
 
       // Dictionary Generation from Source Data Files
       if (!FileFactory.isFileExist(dictFilePath, fileType)) {
-        writer.write(CarbonCommonConstants.MEMBER_DEFAULT_VAL)
-        dimensionSet.map(elem => writer.write(elem))
-        writer.close()
-        writer.commit()
+        val distinctVal: List[String] = generateDictionaryForInitialLoad(writer, dimensionSet)
         sortIndexWriter(dict,
           columnIdentifier,
           absoluteTableIdentifier,
           dimensions,
           index,
-          (dimensionSet + CarbonCommonConstants.MEMBER_DEFAULT_VAL).toList)
+          distinctVal)
       }
       else {
         //Dictionary Generation For Incremental Data Load
-        val distinctVal: Set[String] = dimensionSet
-          .filter(dimVal => checkDistinctValue(dimVal, dict)).map { dimensionValue =>
-          writer.write(dimensionValue)
-          dimensionValue
-        }
-        writer.close()
-        writer.commit()
+        val distinctVal: List[String] = generateDictionaryForIncrementalLoad(writer,
+          dimensionSet,
+          dict)
         sortIndexWriter(dict,
           columnIdentifier,
           absoluteTableIdentifier,
           dimensions,
           index,
-          distinctVal.toList)
+          distinctVal)
       }
+      writer.close()
+      writer.commit()
     }
+  }
+
+  private def checkDistinctValue(dimensionValue: String, dict: Dictionary): Boolean = {
+    dimensionValue != null &&
+    dict.getSurrogateKey(dimensionValue) == CarbonCommonConstants.INVALID_SURROGATE_KEY
+  }
+
+  private def generateDictionaryForInitialLoad(writer: CarbonDictionaryWriterImpl,
+      dimensionSet: Set[String]): List[String] = {
+    writer.write(CarbonCommonConstants.MEMBER_DEFAULT_VAL)
+    dimensionSet.map(elem => writer.write(elem))
+    (dimensionSet + CarbonCommonConstants.MEMBER_DEFAULT_VAL).toList
+  }
+
+  private def generateDictionaryForIncrementalLoad(writer: CarbonDictionaryWriterImpl,
+      dimensionSet: Set[String],
+      dict: Dictionary): List[String] = {
+    val distinctVal: Set[String] = dimensionSet.filter(dimVal => checkDistinctValue(dimVal, dict))
+      .map { dimensionValue =>
+        writer.write(dimensionValue)
+        dimensionValue
+      }
+    distinctVal.toList
   }
 
   private def dictionaryWriter(columnIdentifier: ColumnIdentifier,
