@@ -94,18 +94,15 @@ trait CarbonTableUtil {
   def getColumnSchemas(cardinalityMatrix: List[CardinalityMatrix]): List[ColumnSchema] = {
 
     val encoding = List(Encoding.DICTIONARY).asJava
-    var columnGroupId = -1
-    cardinalityMatrix.map { element =>
+    cardinalityMatrix.zipWithIndex.map { case (element, columnGroupId) =>
       val columnSchema = new ColumnSchema()
       columnSchema.setColumnName(element.columnName)
       columnSchema.setColumnar(true)
       columnSchema.setDataType(parseDataType(element.dataType))
       columnSchema.setEncodingList(encoding)
       columnSchema.setColumnUniqueId(element.columnName)
-      columnSchema
-        .setDimensionColumn(globalDictionaryUtil.isDictionaryColumn(element.cardinality))
+      columnSchema.setDimensionColumn(globalDictionaryUtil.isDictionaryColumn(element.cardinality))
       // TODO: assign column group id to all columns
-      columnGroupId += 1
       columnSchema.setColumnGroup(columnGroupId)
       columnSchema
     }
