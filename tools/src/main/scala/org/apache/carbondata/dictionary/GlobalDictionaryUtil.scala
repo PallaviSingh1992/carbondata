@@ -88,6 +88,8 @@ trait GlobalDictionaryUtil {
           dimensions,
           index,
           distinctVal)
+        writer.close()
+        writer.commit()
       }
       else {
         //Dictionary Generation For Incremental Data Load
@@ -100,9 +102,9 @@ trait GlobalDictionaryUtil {
           dimensions,
           index,
           distinctVal)
+        writer.close()
+        writer.commit()
       }
-      writer.close()
-      writer.commit()
     }
   }
 
