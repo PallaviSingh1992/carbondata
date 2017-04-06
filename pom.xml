@@ -99,6 +99,8 @@
     <module>integration/spark-common</module>
     <module>integration/spark-common-test</module>
     <module>assembly</module>
+      <module>examples/presto</module>
+    <module>integration/presto</module>
   </modules>
 
   <properties>
@@ -439,7 +441,15 @@
               </excludes>
             </configuration>
           </plugin>
-        </plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <configuration>
+                <source>1.8</source>
+                <target>1.8</target>
+              </configuration>
+            </plugin>
+          </plugins>
       </build>
     </profile>
   </profiles>
