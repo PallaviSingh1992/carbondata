@@ -12,38 +12,93 @@
 
     <artifactId>carbondata-examples-presto</artifactId>
 
+    <properties>
+        <spark.version>2.1.0</spark.version>
+        <scala.binary.version>2.11</scala.binary.version>
+        <scala.version>2.11.8</scala.version>
+        <dev.path>${basedir}/../../dev</dev.path>
+    </properties>
 
-<dependencies>
-    <!-- https://mvnrepository.com/artifact/com.facebook.presto/presto-tests -->
-    <dependency>
-        <groupId>com.facebook.presto</groupId>
-        <artifactId>presto-tests</artifactId>
-        <version>0.166</version>
-    </dependency>
 
-    <dependency>
+    <dependencies>
+       <!--  https://mvnrepository.com/artifact/com.facebook.presto/presto-tests-->
+        <dependency>
+            <groupId>com.facebook.presto</groupId>
+            <artifactId>presto-tests</artifactId>
+            <version>0.171</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.carbondata</groupId>
+            <artifactId>carbondata-presto</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.facebook.presto</groupId>
+            <artifactId>presto-jdbc</artifactId>
+            <version>0.171</version>
+        </dependency>
+
+        <dependency>
         <groupId>org.apache.carbondata</groupId>
-        <artifactId>carbondata-presto</artifactId>
+        <artifactId>carbondata-examples-spark2</artifactId>
         <version>${project.version}</version>
-        <exclusions>
-            <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-            </exclusion>
-        </exclusions>
-    </dependency>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-    <dependency>
-        <groupId>com.facebook.presto</groupId>
-        <artifactId>presto-jdbc</artifactId>
-        <version>0.166</version>
-    </dependency>
-
-</dependencies>
+      <!--  <dependency>
+            <groupId>org.apache.carbondata</groupId>
+            <artifactId>carbondata-spark2</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.spark</groupId>
+                    <artifactId>spark-hive-thriftserver_2.10</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.spark</groupId>
+                    <artifactId>spark-repl_2.10</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.spark</groupId>
+                    <artifactId>spark-sql_2.10</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_${scala.binary.version}</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-hive-thriftserver_${scala.binary.version}</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-repl_${scala.binary.version}</artifactId>
+        </dependency>
+-->
+    </dependencies>
 
     <build>
         <plugins>

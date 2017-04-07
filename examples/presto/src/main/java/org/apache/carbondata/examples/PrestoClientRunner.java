@@ -4,6 +4,7 @@ import com.facebook.presto.tests.DistributedQueryRunner;
 import com.google.common.collect.ImmutableMap;
 import io.airlift.log.Logger;
 import io.airlift.log.Logging;
+import org.apache.spark.sql.SparkSession;
 
 import java.sql.*;
 
@@ -71,26 +72,28 @@ public class PrestoClientRunner {
             conn.close();
         } catch (SQLException se) {
             //Handle errors for JDBC
-            se.printStackTrace();
+           log.error(se.getMessage());
         } catch (Exception e) {
             //Handle errors for Class.forName
-            e.printStackTrace();
+           log.error(e.getMessage());
         } finally {
             //finally block used to close resources
             try {
                 if (stmt != null) stmt.close();
-            } catch (SQLException se2) {
-                se2.printStackTrace();
+            } catch (SQLException se) {
+               log.error(se.getMessage());
             }
             try {
                 if (conn != null) conn.close();
             } catch (SQLException se) {
-                se.printStackTrace();
+                log.error(se.getMessage());
             }
         }
     }
 
     public static void main(String[] args) throws Exception {
+        SparkSession spark=CarbonSessionTest.setUpCarbonSession();
+        CarbonSessionTest.createCarbonTable(spark);
         prestoJdbcClient();
     }
 }
