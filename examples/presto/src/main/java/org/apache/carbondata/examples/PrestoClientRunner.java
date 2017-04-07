@@ -59,8 +59,10 @@ public class PrestoClientRunner {
                 int id = res.getInt("cust_id");
                 String name = res.getString("cust_name");
                 //Display values
-                System.out.println("id: " + id + "\n name : " + name);
+                System.out.println("---------------------------");
+                System.out.println( "|"+id + "\t | " + name+"|");
             }
+            System.out.println("---------------------------");
             //STEP 6: Clean-up environment
             res.close();
             log.info("Query executed successfully !!");
@@ -86,8 +88,6 @@ public class PrestoClientRunner {
                 se.printStackTrace();
             }
         }
-
-
     }
 
     public static void main(String[] args) throws Exception {
