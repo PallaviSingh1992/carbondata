@@ -25,7 +25,7 @@ object PrestoClientRunner {
       */
     //Step 1: Create Connection Strings
     val JDBC_DRIVER = "com.facebook.presto.jdbc.PrestoDriver"
-    val DB_URL = "jdbc:presto://localhost:8086/carbondata/benchmarking"
+    val DB_URL = "jdbc:presto://localhost:8086/carbondata/test"
     /**
       * The database Credentials
       */
@@ -43,7 +43,7 @@ object PrestoClientRunner {
         case Some(connection) => {
           //STEP 4: Execute a query
           stmt = Some(connection.createStatement)
-          val sql = "select * from uniq_data"
+          val sql = "select * from test"
           stmt match {
             case Some(statement) => {
               val res = statement.executeQuery(sql)
@@ -51,7 +51,8 @@ object PrestoClientRunner {
              // println("|" + "Customer Id" + "\t | " + "Customer Name" + "\t |" + "Customer Active EMUI" + "\t |" + "Date of Birth" + "|")
               while (res.next()) {
                 //Retrieve by column name and Display
-               // println("|" + res.getInt("cust_id") + "\t | " + res.getString("cust_name") + "\t |" + res.getString("active_emui_version") + "\t |" + res.getDate("dob") + "|")
+                println("|" + res.getInt("id")+ "\t | " + res.getString("name") + "\t |")
+                //+ "\t | " + res.getString("cust_name") + "\t |" + res.getString("active_emui_version") + "\t |" + res.getDate("dob") + "|")
               }
               res.close()
               logger.info(s"Query ${sql} executed successfully !!")
@@ -74,6 +75,8 @@ object PrestoClientRunner {
       case e: Exception =>
         //Handle errors for Class.forName
         logger.error(e.getMessage)
+    }finally {
+      queryRunner.close()
     }
   }
 

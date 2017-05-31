@@ -22,10 +22,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import scala.util.Random
-
 import org.apache.spark.sql.{DataFrame, Row, SaveMode, SparkSession}
 import org.apache.spark.sql.types._
-
 import org.apache.carbondata.core.constants.CarbonCommonConstants
 import org.apache.carbondata.core.util.CarbonProperties
 
