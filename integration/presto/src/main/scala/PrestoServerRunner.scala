@@ -23,7 +23,7 @@ object PrestoServerRunner {
     */
   val CARBONDATA_CATALOG = "carbondata"
   val CARBONDATA_CONNECTOR = "carbondata"
-  val CARBONDATA_STOREPATH = "hdfs://hadoop-master:54311/user/hive/warehouse/carbon.store"
+  val CARBONDATA_STOREPATH = "hdfs://localhost:54310/user/hive/warehouse/carbon.store"
   val CARBONDATA_SOURCE = "carbondata"
 
   /**
