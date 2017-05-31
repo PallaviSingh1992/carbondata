@@ -36,175 +36,302 @@
   </properties>
 
   <dependencies>
-    <dependency>
+   <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>javax.ws.rs-api</artifactId>
       <version>2.0.1</version>
     </dependency>
 
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>3.1.0</version>
-    </dependency>
+      <dependency>
+       <groupId>javax.servlet</groupId>
+       <artifactId>javax.servlet-api</artifactId>
+       <version>3.1.0</version>
+     </dependency>
+
+     <dependency>
+       <groupId>org.glassfish.jersey.core</groupId>
+       <artifactId>jersey-server</artifactId>
+       <version>2.17</version>
+     </dependency>
+     <dependency>
+       <groupId>org.glassfish.jersey.containers</groupId>
+       <artifactId>jersey-container-servlet-core</artifactId>
+       <version>2.17</version>
+     </dependency>
+
+
+     <dependency>
+       <groupId>org.ow2.asm</groupId>
+       <artifactId>asm-all</artifactId>
+       <version>5.0.4</version>
+     </dependency>
+
+     <dependency>
+       <groupId>org.apache.thrift</groupId>
+       <artifactId>libthrift</artifactId>
+       <version>0.9.3</version>
+     </dependency>
 
     <dependency>
-      <groupId>org.glassfish.jersey.core</groupId>
-      <artifactId>jersey-server</artifactId>
-      <version>2.17</version>
-    </dependency>
-    <dependency>
-      <groupId>org.glassfish.jersey.containers</groupId>
-      <artifactId>jersey-container-servlet-core</artifactId>
-      <version>2.17</version>
-    </dependency>
-
-
-    <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm-all</artifactId>
-      <version>5.0.4</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.thrift</groupId>
-      <artifactId>libthrift</artifactId>
-      <version>0.9.3</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.carbondata</groupId>
-      <artifactId>carbondata-core</artifactId>
-      <version>${project.version}</version>
-     <!-- <exclusions>
-        <exclusion>
-          <groupId>com.sun.jersey</groupId>
-          <artifactId>jersey-core</artifactId>b
-        </exclusion>
-      </exclusions> -->
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.carbondata</groupId>
-      <artifactId>carbondata-common</artifactId>
-      <version>${project.version}</version>
+       <groupId>org.apache.carbondata</groupId>
+       <artifactId>carbondata-core</artifactId>
+       <version>${project.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>com.sun.jersey</groupId>
-          <artifactId>jersey-core</artifactId>
+          <groupId>org.apache.spark</groupId>
+          <artifactId>spark-core_2.10</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.spark</groupId>
+          <artifactId>spark-sql_2.10</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
+   <!-- <exclusions>
+         <exclusion>
+           <groupId>com.sun.jersey</groupId>
+           <artifactId>jersey-core</artifactId>b
+         </exclusion>
+       </exclusions> -->
+     </dependency>
 
-    <dependency>
-      <groupId>org.apache.carbondata</groupId>
-      <artifactId>carbondata-processing</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+     <dependency>
+       <groupId>org.apache.carbondata</groupId>
+       <artifactId>carbondata-common</artifactId>
+       <version>${project.version}</version>
+       <exclusions>
+         <exclusion>
+           <groupId>com.sun.jersey</groupId>
+           <artifactId>jersey-core</artifactId>
+         </exclusion>
+       </exclusions>
+     </dependency>
+
+  <dependency>
+        <groupId>org.apache.carbondata</groupId>
+        <artifactId>carbondata-processing</artifactId>
+        <version>${project.version}</version>
+    <exclusions>
+      <exclusion>
+        <groupId>org.apache.spark</groupId>
+        <artifactId>spark-core_2.10</artifactId>
+      </exclusion>
+      <exclusion>
+        <groupId>org.apache.spark</groupId>
+        <artifactId>spark-sql_2.10</artifactId>
+      </exclusion>
+    </exclusions>
+      </dependency>
 
 <!--    <dependency>
-      <groupId>org.apache.carbondata</groupId>
-      <artifactId>carbondata-hadoop</artifactId>
-      <version>${project.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.sun.jersey</groupId>
-          <artifactId>jersey-core</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>-->
+   <groupId>org.apache.carbondata</groupId>
+   <artifactId>carbondata-hadoop</artifactId>
+   <version>${project.version}</version>
+   <exclusions>
+     <exclusion>
+       <groupId>com.sun.jersey</groupId>
+       <artifactId>jersey-core</artifactId>
+     </exclusion>
+   </exclusions>
+ </dependency>-->
+
+  <dependency>
+       <groupId>io.airlift</groupId>
+       <artifactId>bootstrap</artifactId>
+       <version>0.144</version>
+      <!--<scope>provided</scope>-->
+    <exclusions>
+      <exclusion>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-jdk14</artifactId>
+      </exclusion>
+      <exclusion>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+      </exclusion>
+      <exclusion>
+        <groupId>org.slf4j</groupId>
+        <artifactId>log4j-over-slf4j</artifactId>
+      </exclusion>
+    </exclusions>
+     </dependency>
+
+     <dependency>
+       <groupId>io.airlift</groupId>
+       <artifactId>json</artifactId>
+       <version>0.144</version>
+       <!--<scope>provided</scope>-->
+       <exclusions>
+         <exclusion>
+           <groupId>org.slf4j</groupId>
+           <artifactId>slf4j-jdk14</artifactId>
+         </exclusion>
+         <exclusion>
+           <groupId>org.slf4j</groupId>
+           <artifactId>slf4j-log4j12</artifactId>
+         </exclusion>
+         <exclusion>
+           <groupId>org.slf4j</groupId>
+           <artifactId>log4j-over-slf4j</artifactId>
+         </exclusion>
+         <exclusion>
+           <groupId>com.fasterxml.jackson.core</groupId>
+           <artifactId>jackson-databind</artifactId>
+         </exclusion>
+
+       </exclusions>
+     </dependency>
 
     <dependency>
-      <groupId>io.airlift</groupId>
-      <artifactId>bootstrap</artifactId>
-      <version>0.144</version>
+       <groupId>io.airlift</groupId>
+       <artifactId>log</artifactId>
+       <version>0.144</version>
       <!--<scope>provided</scope>-->
       <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-jdk14</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>log4j-over-slf4j</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
+     </dependency>
 
-    <dependency>
-      <groupId>io.airlift</groupId>
-      <artifactId>json</artifactId>
-      <version>0.144</version>
-      <!--<scope>provided</scope>-->
-    </dependency>
+     <dependency>
+       <groupId>io.airlift</groupId>
+       <artifactId>slice</artifactId>
+       <version>0.27</version>
+      <!-- <scope>provided</scope>-->
+       <exclusions>
+         <exclusion>
+           <groupId>org.slf4j</groupId>
+           <artifactId>slf4j-jdk14</artifactId>
+         </exclusion>
+         <exclusion>
+           <groupId>org.slf4j</groupId>
+           <artifactId>slf4j-log4j12</artifactId>
+         </exclusion>
+         <exclusion>
+           <groupId>org.slf4j</groupId>
+           <artifactId>log4j-over-slf4j</artifactId>
+         </exclusion>
+       </exclusions>
+     </dependency>
 
-    <dependency>
-      <groupId>io.airlift</groupId>
-      <artifactId>log</artifactId>
-      <version>0.144</version>
-      <!--<scope>provided</scope>-->
-    </dependency>
+         <dependency>
+           <groupId>io.airlift</groupId>
+           <artifactId>units</artifactId>
+           <version>1.0</version>
+      <!--     <scope>provided</scope>-->
+           <exclusions>
+             <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-jdk14</artifactId>
+             </exclusion>
+             <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+             </exclusion>
+             <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>log4j-over-slf4j</artifactId>
+             </exclusion>
+           </exclusions>
+         </dependency>
 
-    <dependency>
-      <groupId>io.airlift</groupId>
-      <artifactId>slice</artifactId>
-      <version>0.27</version>
-      <scope>provided</scope>
-    </dependency>
+<!--     <dependency>
+       <groupId>com.fasterxml.jackson.core</groupId>
+       <artifactId>jackson-annotations</artifactId>
+       <version>2.8.1</version>
+       <scope>provided</scope>
+     </dependency>-->
 
-    <dependency>
-      <groupId>io.airlift</groupId>
-      <artifactId>units</artifactId>
-      <version>1.0</version>
-      <scope>provided</scope>
-    </dependency>
+     <dependency>
+       <groupId>com.google.guava</groupId>
+       <artifactId>guava</artifactId>
+       <version>18.0</version>
+     </dependency>
 
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <version>2.8.1</version>
-      <scope>provided</scope>
-    </dependency>
+     <dependency>
+       <groupId>com.google.inject</groupId>
+       <artifactId>guice</artifactId>
+       <version>4.0</version>
+     </dependency>
 
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>18.0</version>
-    </dependency>
+   <!--presto integrated-->
+   <dependency>
+       <groupId>com.facebook.presto</groupId>
+       <artifactId>presto-spi</artifactId>
+       <version>${presto.version}</version>
+      <!-- <scope>provided</scope>-->
+     <exclusions>
+       <exclusion>
+         <groupId>org.antlr</groupId>
+         <artifactId>antlr4-runtime</artifactId>
+       </exclusion>
+       <exclusion>
+         <groupId>com.fasterxml.jackson.core</groupId>
+         <artifactId>jackson-databind</artifactId>
+       </exclusion>
+     </exclusions>
+     </dependency>
 
-    <dependency>
-      <groupId>com.google.inject</groupId>
-      <artifactId>guice</artifactId>
-      <version>4.0</version>
-    </dependency>
-
-    <!--presto integrated-->
-    <dependency>
-      <groupId>com.facebook.presto</groupId>
-      <artifactId>presto-spi</artifactId>
-      <version>${presto.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
+     <dependency>
       <groupId>com.facebook.presto.hadoop</groupId>
       <artifactId>hadoop-apache2</artifactId>
       <version>2.7.3-1</version>
+       <exclusions>
+         <exclusion>
+           <groupId>org.antlr</groupId>
+           <artifactId>antlr4-runtime</artifactId>
+         </exclusion>
+         <exclusion>
+           <groupId>com.fasterxml.jackson.core</groupId>
+           <artifactId>jackson-databind</artifactId>
+         </exclusion>
+       </exclusions>
     </dependency>
 
     <dependency>
-      <groupId>com.facebook.presto</groupId>
-      <artifactId>presto-tests</artifactId>
-      <version>${presto.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.openjdk.jol</groupId>
-          <artifactId>jol-core</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+        <groupId>com.facebook.presto</groupId>
+        <artifactId>presto-tests</artifactId>
+        <version>${presto.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.openjdk.jol</groupId>
+            <artifactId>jol-core</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
 
-    <dependency>
-      <groupId>com.facebook.presto</groupId>
-      <artifactId>presto-jdbc</artifactId>
-      <version>${presto.version}</version>
-    </dependency>
+     <dependency>
+    <groupId>com.facebook.presto</groupId>
+    <artifactId>presto-jdbc</artifactId>
+    <version>${presto.version}</version>
+       <exclusions>
+         <exclusion>
+           <groupId>org.antlr</groupId>
+           <artifactId>antlr4-runtime</artifactId>
+         </exclusion>
+         <exclusion>
+           <groupId>com.fasterxml.jackson.core</groupId>
+           <artifactId>jackson-databind</artifactId>
+         </exclusion>
+       </exclusions>
+  </dependency>
 
     <dependency>
       <groupId>org.apache.carbondata</groupId>
