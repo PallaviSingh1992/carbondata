@@ -112,7 +112,7 @@ object PrestoBenchMarking {
 
           var i = 0
           while (res.next()) {
-           /*  println(res.getString("s_name") + "------" + i)*/
+           //  println("Result : "+res.getInt("count"))
             i = i + 1
           }
           println("row count ----" + i)
@@ -147,9 +147,9 @@ object PrestoBenchMarking {
 
         println(">>>>>>QUERY EXECUTION TIME " + time)
        // util.writeResults(s"\n$time",prestoFile)
-          /* util.writeResults(" [ Query :" + query + "\n"
+        util.writeResults(" [ Query :" + query + "\n"
                              + "Time :" + time + " ] \n\n "
-             , prestoFile)*/
+             , prestoFile)
       }
     }
     // scalastyle:off

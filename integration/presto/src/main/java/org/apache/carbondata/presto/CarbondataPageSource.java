@@ -163,7 +163,7 @@ public class CarbondataPageSource implements ConnectorPageSource {
         if(types.size() == 0) {
           Object[] data = columnData.get(0);
           pageBuilder.declarePositions(data.length);
-          System.out.println("Number of Rows in PageSource " + data.length);
+       //   System.out.println("Number of Rows in PageSource " + data.length);
         }
       }
     }
