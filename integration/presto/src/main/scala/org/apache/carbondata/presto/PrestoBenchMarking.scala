@@ -112,7 +112,7 @@ object PrestoBenchMarking {
 
           var i = 0
           while (res.next()) {
-            println(res.getInt("count") + "------" + i)
+            //println(res.getInt("count") + "------" + i)
             i = i + 1
           }
           println("row count ----" + i)

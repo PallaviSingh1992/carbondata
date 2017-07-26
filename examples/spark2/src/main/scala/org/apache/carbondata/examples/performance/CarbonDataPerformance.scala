@@ -66,7 +66,7 @@ object CarbonDataPerformance {
 
     spark.sparkContext.setLogLevel("WARN")
 
-/*    spark.sql("DROP TABLE IF EXISTS NATION").show()
+    spark.sql("DROP TABLE IF EXISTS NATION").show()
     spark.sql("DROP TABLE IF EXISTS REGION").show()
     spark.sql("DROP TABLE IF EXISTS PART").show()
     spark.sql("DROP TABLE IF EXISTS PARTSUPP").show()
@@ -210,9 +210,9 @@ object CarbonDataPerformance {
     spark.sql("SELECT * FROM CUSTOMER").show()
     spark.sql("SELECT * FROM ORDERS").show()
     spark.sql("SELECT * FROM LINEITEM").show()
-    spark.sql("drop table if exists q18_large_volume_customer_cached").show()*/
+    spark.sql("drop table if exists q18_large_volume_customer_cached").show()
 
-    Try {
+    /*Try {
       QueryUtil.evaluateTimeForQuery(queryList, spark)
     } match {
       case Success(queryAndTimeList) => println("\n\n\n Estimated time for queries (in seconds)")
@@ -228,7 +228,7 @@ object CarbonDataPerformance {
       case Failure(exception) =>
         exception.printStackTrace()
         println(" Exception occured " + exception.getMessage)
-    }
+    }*/
 
     spark.stop()
     System.exit(0)
